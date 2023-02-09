@@ -1,0 +1,89 @@
+<!-- eslint-disable no-multiple-empty-lines -->
+<!-- eslint-disable max-len -->
+<!-- eslint-disable vuejs-accessibility/label-has-for -->
+<template>
+<main class="content container">
+  <div class="content__top content__top--catalog">
+    <h1 class="content__title">
+      Каталог
+    </h1>
+    <span class="content__info">
+      152 товара
+    </span>
+  </div>
+  <div class="content__catalog">
+    <ProductFilter :price-from.sync="filterPriceFrom" :price-to.sync="filterPriceTo" :category-id.sync="filterCategoryId" :colors-id.sync="filterColor"/>
+
+      <ul class="catalog__list">
+        <li class="catalog__item" v-for="product in products" :key="product.id">
+          <ProductItem :products="product" />
+        </li>
+        <BasePagination v-model="page" :count="countProducts" :per-page="productsPerPage" />
+      </ul>
+
+  </div>
+</main>
+
+
+</template>
+
+<script>
+import products from '@/data/products';
+import ProductItem from '@/components/ProductItem.vue';
+import BasePagination from '@/components/BasePagination.vue';
+import ProductFilter from './ProductFilter.vue';
+
+export default {
+  components: { ProductItem, BasePagination, ProductFilter },
+  data() {
+    return {
+      filterPriceFrom: 0,
+      filterPriceTo: 0,
+      filterCategoryId: 0,
+      filterColor: 0,
+
+      page: 1,
+      productsPerPage: 3,
+    };
+  },
+  computed: {
+    filteredProducts() {
+      let filteredProducts = products;
+
+      if (this.filterPriceFrom > 0) {
+        filteredProducts = filteredProducts.filter(
+          (product) => product.price > this.filterPriceFrom,
+        );
+      }
+
+      if (this.filterPriceTo > 0) {
+        filteredProducts = filteredProducts.filter(
+          (product) => product.price < this.filterPriceTo,
+        );
+      }
+
+      if (this.filterCategoryId) {
+        filteredProducts = filteredProducts.filter(
+          (product) => product.categoryId === this.filterCategoryId,
+        );
+      }
+
+      if (this.filterColor) {
+        filteredProducts = filteredProducts.filter(
+          (product) => product.colors === this.filterColor,
+        );
+      }
+
+      return filteredProducts;
+    },
+    products() {
+      const offset = (this.page - 1) * this.productsPerPage;
+      return this.filteredProducts.slice(offset, offset + this.productsPerPage);
+    },
+    countProducts() {
+      return this.filteredProducts.length;
+    },
+  },
+};
+
+</script>
