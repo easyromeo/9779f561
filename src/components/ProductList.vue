@@ -12,7 +12,7 @@
     </span>
   </div>
   <div class="content__catalog">
-    <ProductFilter :price-from.sync="filterPriceFrom" :price-to.sync="filterPriceTo" :category-id.sync="filterCategoryId" :colors-id.sync="filterColor"/>
+    <ProductFilter :price-from.sync="filterPriceFrom" :price-to.sync="filterPriceTo" :category-id.sync="filterCategoryId" :color.sync="filterColor"/>
 
       <ul class="catalog__list">
         <li class="catalog__item" v-for="product in products" :key="product.id">
@@ -29,6 +29,7 @@
 
 <script>
 import products from '@/data/products';
+// import colors from '@/data/colors';
 import ProductItem from '@/components/ProductItem.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import ProductFilter from './ProductFilter.vue';
@@ -70,7 +71,9 @@ export default {
 
       if (this.filterColor) {
         filteredProducts = filteredProducts.filter(
-          (product) => product.colors === this.filterColor,
+          (product) => product.colors.find(
+            (colors) => colors.color === this.filterColor,
+          ),
         );
       }
 

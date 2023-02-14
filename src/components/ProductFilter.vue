@@ -33,7 +33,7 @@
                 <ul class="colors">
                     <li class="colors__item" v-for="color in colors" :key="color.id">
                         <label class="colors__label">
-                            <input class="colors__radio sr-only" type="radio" name="color" v-model.number="currentColorId" :value="color.id">
+                            <input class="colors__radio sr-only" type="radio" name="color" v-model.number="currentColorId" :value="color.color">
                             <span class="colors__value" :style="{ backgroundColor: color.color }">
                             </span>
                         </label>
@@ -185,8 +185,8 @@ export default {
     categoryId(value) {
       this.currentCategoryId = value;
     },
-    color(color) {
-      this.currentColorId = color;
+    color(value) {
+      this.currentColorId = value;
     },
   },
   methods: {
