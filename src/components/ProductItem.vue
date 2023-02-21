@@ -1,10 +1,7 @@
-<!-- eslint-disable max-len -->
-<!-- eslint-disable vuejs-accessibility/label-has-for -->
+<!-- eslint-disable vue/no-deprecated-filter -->
 <template>
-    <section class="catalog">
-
-        <span :product="products">
-            <a class="catalog__pic" href="#">
+    <li class="catalog__item">
+        <a class="catalog__pic" href="#" @click.prevent="gotoPage('product', {id: products.id})">
                 <img :src="products.image" :alt="products.title">
             </a>
 
@@ -15,7 +12,7 @@
             </h3>
 
             <span class="catalog__price">
-                {{ products.price + '$' }}
+                {{ products.price | numberFormat }} $
             </span>
 
             <ul class="colors colors--black">
@@ -27,12 +24,20 @@
                     </label>
                 </li>
             </ul>
-        </span>
-    </section>
+    </li>
 </template>
 
 <script>
+import gotoPage from "@/helpers/gotoPage";
+import numberFormat from "@/helpers/numberFormat";
+
 export default {
+    filters: {
+        numberFormat
+    },
+    methods: {
+        gotoPage
+    },
   props: ['products'],
 };
 
