@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/no-deprecated-filter -->
 <template>
     <li class="catalog__item">
-        <a class="catalog__pic" href="#" @click.prevent="gotoPage('product', {id: products.id})">
+        <router-link class="catalog__pic" href="#" :to="{name: 'product', params: {id: products.id}}">
                 <img :src="products.image" :alt="products.title">
-            </a>
+            </router-link>
 
             <h3 class="catalog__title">
                 <a href="#">

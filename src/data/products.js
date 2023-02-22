@@ -25,7 +25,7 @@ export default [
   },
   {
     id: 4,
-    categoryId: [3, 7],
+    categoryId: 3,
     title: 'CPU Intel Core i9-12900K 3.2-5.2GHz',
     price: 820,
     image: 'img/Inteli912900K.jpg',
@@ -41,7 +41,7 @@ export default [
   },
   {
     id: 6,
-    categoryId: 5,
+    categoryId: 3,
     title: 'Power Supply ATX1000W Seasonic Prime GX-1000 80+ Gold',
     price: 319,
     image: 'img/SeasonicPrimeGX1000.jpg',
