@@ -54,7 +54,7 @@
             </fieldset>
 
             <div class="item__row">
-              <addAmount/>
+              <addAmount @quantity-changed="updateQuantity"/>
 
               <button class="button button--primery" type="submit">
                 В корзину
@@ -134,9 +134,16 @@ import categories from '@/data/categories';
 import gotoPage from '@/helpers/gotoPage';
 import numberFormat from '@/helpers/numberFormat';
 import addAmount from '@/components/addAmount.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   components: {addAmount},
+  data(){
+    return{
+      quantity:'',
+      cart:[],
+    };
+  },
     filters: {
       numberFormat
     },
@@ -146,16 +153,23 @@ export default {
       },
       category(){
         return categories.find(category => category.id === this.product.categoryId);
-      }
+      },
+      ...mapGetters({counter: 'state'})
     },
     methods: {
       gotoPage,
       addToCart(){
         this.$store.commit(
           'addProductToCart',
-          {productId: this.product.id, amount: this.addAmount}
+          {productId: this.product.id, amount: this.quantity}
           );
-      }
+        this.cart.push({
+          quantity: this.quantity,
+        })
+      },
+      updateQuantity(quantity) {
+      this.quantity = quantity;
+      },
     }
 };
 
