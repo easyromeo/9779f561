@@ -1,7 +1,9 @@
 <!-- eslint-disable vue/no-deprecated-v-bind-sync -->
 <!-- eslint-disable vue/no-deprecated-filter -->
 <template>
-  <main class="content container">
+  <main class="content container" v-if="productLoading">Загрузка товара...</main>
+  <main class="content container" v-else-if="!productData">Не удалось загрузить товар</main>
+  <main class="content container" v-else>
     <div class="content__top">
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
@@ -25,7 +27,7 @@
     <section class="item">
       <div class="item__pics pics">
         <div class="pics__wrapper">
-          <img width="570" height="570" :src="product.image" :alt="product.title">
+          <img width="570" height="570" :src="product.image.file.url" :alt="product.title">
         </div>
       </div>
 
@@ -45,8 +47,8 @@
               <ul class="colors">
                 <li class="colors__item" v-for="color in product.colors" :key="color.id">
                   <label class="colors__label">
-                    <input class="colors__radio sr-only" type="radio" name="color-item" :value="color.color">
-                    <span class="colors__value" :style="{ backgroundColor: color.color }">
+                    <input class="colors__radio sr-only" type="radio" name="color-item" :value="color.code">
+                    <span class="colors__value" :style="{ backgroundColor: color.code }">
                     </span>
                   </label>
                 </li>
@@ -54,12 +56,14 @@
             </fieldset>
 
             <div class="item__row">
-              <addAmount @quantity-changed="updateQuantity"/>
+              <addAmount :quantity="quantity" @quantity-changed="updateQuantity"/>
 
-              <button class="button button--primery" type="submit">
+              <button class="button button--primery" type="submit" :disabled="productAddSending">
                 В корзину
               </button>
             </div>
+            <div v-show="productAdded">Товар добавлен в корзину</div>
+            <div v-show="productAddSending">Добавляем товар в корзину...</div>
           </form>
         </div>
       </div>
@@ -129,19 +133,25 @@
 </template>
 
 <script>
-import products from '@/data/products';
-import categories from '@/data/categories';
 import gotoPage from '@/helpers/gotoPage';
 import numberFormat from '@/helpers/numberFormat';
 import addAmount from '@/components/addAmount.vue';
-import { mapGetters } from 'vuex';
+import axios from 'axios';
+import { API_BASE_URL } from '@/config';
+import { mapActions } from 'vuex';
 
 export default {
   components: {addAmount},
   data(){
     return{
-      quantity:'',
+      quantity:1,
       cart:[],
+      productData: null,
+      productLoading: false,
+      productLoadingFailed: false,
+
+      productAdded: false,
+      productAddSending: false
     };
   },
     filters: {
@@ -149,20 +159,29 @@ export default {
     },
     computed: {
       product(){
-        return products.find(product => product.id === +this.$route.params.id);
+        return this.productData;
       },
       category(){
-        return categories.find(category => category.id === this.product.categoryId);
+        return this.productData.category;
       },
-      ...mapGetters({counter: 'state'})
+      colors(){
+        return this.productData.colors;
+      }
     },
     methods: {
+      ...mapActions(['addProductToCart']),
+
       gotoPage,
       addToCart(){
-        this.$store.commit(
-          'addProductToCart',
-          {productId: this.product.id, amount: this.quantity}
-          );
+        this.productAdded = false;
+        this.productAddSending = true;
+
+        this.addProductToCart({productId: this.product.id, amount: this.quantity})
+        .then(() => {
+          this.productAdded = true;
+          this.productAddSending = false;
+        });
+
         this.cart.push({
           quantity: this.quantity,
         })
@@ -170,6 +189,23 @@ export default {
       updateQuantity(quantity) {
       this.quantity = quantity;
       },
+      loadProduct(){
+        this.productLoading = true;
+        this.productLoadingFailed = false;
+        axios.get(API_BASE_URL + `/api/products/` + this.$route.params.id)
+        .then(response => this.productData = response.data)
+        .catch(() => this.productLoadingFailed = true)
+        .then(() => this.productLoading = false);
+      },
+
+    },
+    watch:{
+      '$route.params.id': {
+        handler(){
+          this.loadProduct();
+        },
+        immediate: true
+      }
     }
 };
 

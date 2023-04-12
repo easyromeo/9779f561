@@ -22,7 +22,13 @@
         {{ $store.state.cartProducts.length }} товара
       </span>
     </div>
-
+    <div v-if="isLoadingCart" class="cart-loading">
+      <img src="/img/logspiner.gif" alt="Loading..." />
+    </div>
+<div v-else-if="hasFailedLoadingCart" class="cart-loading">
+  Произошла ошибка при загруске товаров.Попробовать еще раз
+  </div>
+<div v-else>
     <section class="cart">
       <form class="cart__form form" action="#" method="POST">
         <div class="cart__field">
@@ -45,6 +51,7 @@
         </div>
       </form>
     </section>
+  </div>
   </main>
 </template>
 
@@ -57,7 +64,24 @@ export default {
   filters: {numberFormat},
   components: {CartItem},
   computed: {
-    ...mapGetters({products: 'cartDetailProducts', totalPrice: 'cartTotalPrice'})
+    ...mapGetters({products: 'cartDetailProducts', totalPrice: 'cartTotalPrice'}),
+    isLoadingCart(){
+      return this.$store.state.isLoadingCart;
+    },
+    hasFailedLoadingCart(){
+      return this.$store.state.hasFailedLoadingCart;
+    }
   }
 }
 </script>
+
+<style>
+.cart-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 24px;
+  color: #999;
+}
+</style>

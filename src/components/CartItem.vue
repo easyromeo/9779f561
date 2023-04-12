@@ -12,19 +12,7 @@
               </span>
 
               <div class="product__counter form__counter">
-                <button type="button" aria-label="Убрать один товар">
-                  <svg width="10" height="10" fill="currentColor">
-                    <use xlink:href="#icon-minus"></use>
-                  </svg>
-                </button>
-
-                <input type="text" v-model.number="amount" name="count">
-
-                <button type="button" aria-label="Добавить один товар">
-                  <svg width="10" height="10" fill="currentColor">
-                    <use xlink:href="#icon-plus"></use>
-                  </svg>
-                </button>
+                 <addAmount :value="amount" @quantity-changed="amount = $event" class="adamount"/>
               </div>
 
               <b class="product__price">
@@ -42,8 +30,10 @@
 <script>
 import numberFormat from '@/helpers/numberFormat';
 import { mapMutations } from 'vuex';
+import addAmount from '@/components/addAmount.vue';
 
 export default {
+  components:{addAmount},
     filters: {numberFormat},
     props:['item'],
     computed: {
@@ -52,12 +42,18 @@ export default {
                 return this.item.amount;
             },
             set(value){
-                this.$store.commit('updateCartProductAmount', {productId: this.item.productId, amount: value});
+                this.$store.dispatch('updateCartProductAmount', {productId: this.item.productId, amount: value});
             }
         }
     },
     methods: {
-        ...mapMutations({deleteProduct: 'deleteCartProduct'}),
+        ...mapMutations({deleteProduct: 'deleteCartProduct'})
     }
 }
 </script>
+
+<style>
+.adamount{
+  height: auto;width: 105px;
+}
+</style>

@@ -10,9 +10,13 @@
       </span>
     </div>
     <div class="content__catalog">
-      <ProductFilter :price-from.sync="filterPriceFrom" :price-to.sync="filterPriceTo" :category-id.sync="filterCategoryId" :color.sync="filterColor" />
+      <ProductFilter :price-from.sync="filterPriceFrom" :price-to.sync="filterPriceTo" :category-id.sync="filterCategoryId" :colorId.sync="filterColor" />
 
       <section class="catalog">
+
+        <div v-if="productsLoading" class="cart-loading"><img src="/img/logspiner.gif" alt="loading"> Загруска товаров...</div>
+        <div v-if="productsLoadingFailed" class="cart-loading">Произошла ошибка при загруске товаров <button @click.prevent="loadProducts">Попробовать еще раз</button></div>
+
         <ProductList :products="products"/>
 
         <BasePagination v-model="page" :count="countProducts" :per-page="productsPerPage" />
@@ -24,8 +28,9 @@
 <script>
 import ProductList from '@/components/ProductList.vue';
 import BasePagination from '@/components/BasePagination.vue';
-import products from '@/data/products';
 import ProductFilter from '@/components/ProductFilter.vue';
+import axios from 'axios';
+import { API_BASE_URL } from '@/config';
 
 export default {
   components: { ProductList, BasePagination, ProductFilter },
@@ -38,44 +43,81 @@ export default {
 
       page: 1,
       productsPerPage: 3,
-    };
+
+      productsData: null,
+
+      productsLoading: false,
+      productsLoadingFailed: false
+    }
   },
   computed: {
-    filteredProducts() {
-      let filteredProducts = products;
-
-      if (this.filterPriceFrom > 0) {
-        filteredProducts = filteredProducts.filter(
-          (products) => products.price > this.filterPriceFrom,
-        );
-      }
-
-      if (this.filterPriceTo > 0) {
-        filteredProducts = filteredProducts.filter(
-          (products) => products.price < this.filterPriceTo,
-        );
-      }
-      if (this.filterCategoryId) {
-        filteredProducts = filteredProducts.filter(
-          (products) => products.categoryId === this.filterCategoryId,
-        );
-      }
-      if (this.filterColor) {
-        filteredProducts = filteredProducts.filter(
-          (products) => products.colors.find(
-            (colors) => colors.color === this.filterColor,
-          ),
-        );
-      }
-      return filteredProducts;
-    },
-    products() {
-      const offset = (this.page - 1) * this.productsPerPage;
-      return this.filteredProducts.slice(offset, offset + this.productsPerPage);
+      products() {
+      return this.productsData 
+      ? this.productsData.items.map(product => {
+        return {
+          ...product,
+          image: product.image.file.url
+        }
+      })
+      : [];
     },
     countProducts() {
-      return this.filteredProducts.length;
+      return this.productsData ? this.productsData.pagination.total : 0;
     },
   },
+  methods:{
+    loadProducts(){
+      this.productsLoading = true;
+      this.productsLoadingFailed = false;
+      clearTimeout(this.loadProductsTimer);
+      this.loadProductsTimer = setTimeout(() => {
+        axios.get(API_BASE_URL + `/api/products`, {
+        params: {
+          page: this.page,
+          limit: this.productsPerPage,           
+          minPrice: this.filterPriceFrom,
+          maxPrice: this.filterPriceTo,
+          categoryId: this.filterCategoryId,
+          colorId: this.filterColor
+        }
+      })
+      .then(response => this.productsData = response.data)
+      .catch(() => this.productsLoadingFailed = true)
+      .then(() => this.productsLoading = false);
+      }, 500);
+
+    }
+  },
+  watch: {
+    page(){
+      this.loadProducts();
+    },
+    filterPriceFrom(){
+      this.loadProducts();
+    },
+    filterPriceTo(){
+      this.loadProducts();
+    },
+    filterCategoryId(){
+      this.loadProducts();
+    },
+    filterColor(){
+      this.loadProducts();
+    },
+  },
+  created(){
+    this.loadProducts();
+  }
 };
 </script>
+
+<style>
+.cart-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 24px;
+  color: #999;
+}
+</style>
