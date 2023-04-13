@@ -21,9 +21,24 @@ export default new Vuex.Store({
                 item.amount = amount;
             }
         },
-        deleteCartProduct(state, productId){
+        removeCartProduct(state, productId) {
             state.cartProducts = state.cartProducts.filter(item => item.productId !== productId);
-        },
+            axios
+              .delete(API_BASE_URL + '/api/baskets/products', {
+                data: {
+                  productId: productId,
+                },
+                params: {
+                  userAccessKey: state.userAccessKey,
+                },
+              })
+              .then(response => {
+                state.cartProductsData = response.data.items;
+              })
+              .catch(error => {
+                console.log(error);
+              });
+          },
         updateUserAccessKey(state, accessKey){
             state.userAccessKey = accessKey;
         },
@@ -126,6 +141,9 @@ export default new Vuex.Store({
             .catch(() => {
                 context.commit('syncCartProducts');
             })
-        }
+        },
+        removeCartProduct(context, productId) {
+            context.commit('removeCartProduct', productId);
+          },
     }
 });
