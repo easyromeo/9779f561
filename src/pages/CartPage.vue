@@ -24,9 +24,10 @@
     </div>
     <div v-if="isLoadingCart" class="cart-loading">
       <img src="/img/logspiner.gif" alt="Loading..." />
+      Загруска товаров в корзине...
     </div>
 <div v-else-if="hasFailedLoadingCart" class="cart-loading">
-  Произошла ошибка при загруске товаров.Попробовать еще раз
+  Произошла ошибка при загруске товаров, нет соеединения с сервером.Попробовать еще раз
   </div>
 <div v-else>
     <section class="cart">
@@ -45,9 +46,9 @@
             Итого: <span>{{ totalPrice | numberFormat}} $</span>
           </p>
 
-          <button class="cart__button button button--primery" type="submit">
+          <router-link _tag:button :to="{name: 'order'}" class="cart__button button button--primery" type="submit">
             Оформить заказ
-          </button>
+          </router-link>
         </div>
       </form>
     </section>
@@ -59,7 +60,6 @@
 import numberFormat from '@/helpers/numberFormat';
 import { mapGetters } from 'vuex';
 import CartItem from '@/components/CartItem.vue';
-
 export default {
   filters: {numberFormat},
   components: {CartItem},
@@ -71,7 +71,10 @@ export default {
     hasFailedLoadingCart(){
       return this.$store.state.hasFailedLoadingCart;
     }
-  }
+  },
+  mounted() {
+    this.$store.dispatch('loadCart');
+  },
 }
 </script>
 

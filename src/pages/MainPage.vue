@@ -80,10 +80,10 @@ export default {
           categoryId: this.filterCategoryId,
           colorId: this.filterColor
         }
-      })
-      .then(response => this.productsData = response.data)
-      .catch(() => this.productsLoadingFailed = true)
-      .then(() => this.productsLoading = false);
+       })
+       .then(response => this.productsData = response.data)
+       .catch(() => this.productsLoadingFailed = true)
+       .then(() => this.productsLoading = false);
       }, 500);
 
     }
